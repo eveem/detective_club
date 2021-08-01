@@ -65,12 +65,12 @@ def get_cards(n=8):
 
 
 @bot.command()
-async def greeting(ctx):
+async def hi(ctx):
     await ctx.send("สวัสดีพวกเด็กๆ")
 
 
 @bot.command()
-async def start(ctx, users: Greedy[User]):
+async def spyfall(ctx, users: Greedy[User]):
     clear_value()
     total_mention = len(users)
     bot.players = [str(user.id) for user in users]
@@ -90,10 +90,10 @@ async def start(ctx, users: Greedy[User]):
         else:
             await user.send("นายเปง spy นะ เนียนๆ เข้าไว้")
 
-    await asyncio.sleep(20)
+    await asyncio.sleep(3)
     await ctx.send("ช่วงเวลาถามคำถาม หาตัวเจ้า spy เริ่ม!")
     message = await ctx.send("Timer start!")
-    time = 300
+    time = 10
     while True:
         try:
             await asyncio.sleep(1)
@@ -121,17 +121,24 @@ async def start(ctx, users: Greedy[User]):
 async def vote(ctx, user):
     bot.voted += 1
     voter_name = str(ctx.author).split("#")[0]
-    user = user.replace("<@!", "").replace(">", "")
+    print(bot.vote_score)
+    print(bot.voter)
+    print(bot.spy_id)
+    print(user)
+    # await asyncio.sleep(1)
+    user_formatted = (
+        str(user).replace("<", "").replace(">", "").replace("@", "").replace("!", "")
+    )
 
-    bot.vote_score[user] += 1
-    bot.voter[user].append(voter_name)
+    bot.vote_score[user_formatted] += 1
+    bot.voter[user_formatted].append(voter_name)
 
     if bot.voted == len(bot.players):
         if max(bot.vote_score.values()) == bot.vote_score[bot.spy_id]:
             for v in bot.voter[bot.spy_id]:
                 bot.scores[v] += 1
         result = "Rounds end:\n" + "\n".join(
-            f"{k}: {v} points" for k, v in bot.scores.items()
+            f"@{k}: {v} points" for k, v in bot.scores.items()
         )
         await ctx.send(result)
 
